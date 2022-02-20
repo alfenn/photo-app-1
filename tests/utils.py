@@ -13,7 +13,7 @@ def modify_system_path():
 modify_system_path()
 
 # root_url = 'http://127.0.0.1:5000'
-root_url = 'https://photo-app-demo-1.herokuapp.com/'
+root_url = 'https://photo-app-1-heroku.herokuapp.com/'
 
 connection_string = os.environ.get('DB_URL')
 db = create_engine(connection_string, pool_size=10, max_overflow=0)
