@@ -288,7 +288,7 @@ const unbookmarkPost = (postId, bookmarkId, elem) => {
 const post2HtmlWithinCard = post => {
     return `
         <div class="header">
-            <! -- <h3>${ post.user.username } - ${post.current_user_like_id} - ${post.current_user_bookmark_id}</h3> -->
+            <!-- <h3>${ post.user.username } - ${post.current_user_like_id} - ${post.current_user_bookmark_id}</h3> -->
             <h3>${ post.user.username }</h3>
             <i class="fa fa-dots"></i>
         </div>
