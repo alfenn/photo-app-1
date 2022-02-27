@@ -1,0 +1,11 @@
+<section class="stories">
+    <ul>
+        {% for stor in stories %}
+            <li class="story">
+                <img src="{{ stor.get('user').get('profile_url') }}" alt="Profile pic for {{ stor.get('user').get('username') }}">
+                <p>{{ stor.get('user').get('username') }}</p>
+            </li>
+        {% endfor %}
+        
+    </ul>
+</section>

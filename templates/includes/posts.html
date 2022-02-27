@@ -1,0 +1,46 @@
+{% for post in posts %}
+    <section class="card">
+        <div class="header">
+            <h3>{{ post.get('user').get('username') }}</h3>
+            <i class="fa fa-dots"></i>
+        </div>
+        <img src="{{ post.get('image_url') }}" alt="Image posted by {{ post.get('user').get('username') }}" width="300" height="300">
+        <div class="info">
+            <div class="buttons">
+                <div>
+                    <i class="far fa-heart"></i>
+                    <i class="far fa-comment"></i>
+                    <i class="far fa-paper-plane"></i>
+                </div>
+                <div>
+                    <i class="far fa-bookmark"></i>
+                </div>
+            </div>
+            <p class="likes"><strong>{{ post.get('likes') }} likes</strong></p>
+            <div class="caption">
+                <p>
+                    <strong>{{ post.get('user').get('username') }}</strong> 
+                    {{ post.title }}.. <button class="link">more</button>
+                </p>
+            </div>
+            <div class="comments">
+                {% if post.get('comments')|length > 1 %}
+                    <p><button class="link">View all {{ post.get('comments')|length }} comments</button></p>
+                {% endif %}
+                {% for comment in post.get('comments')[:1] %}
+                    <p>
+                        <strong>{{ comment.get('user').get('username') }}</strong> 
+                        {{ comment.get('text') }}
+                    </p>
+                {% endfor %}
+                <p class="timestamp">{{ post.get('display_time') }}</p>
+            </div>
+        </div>
+        <div class="add-comment">
+            <div class="input-holder">
+                <input type="text" aria-label="Add a comment" placeholder="Add a comment...">
+            </div>
+            <button class="link">Post</button>
+        </div>
+    </section>
+{% endfor %}

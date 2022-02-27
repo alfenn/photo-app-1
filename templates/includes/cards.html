@@ -1,0 +1,70 @@
+<section class="cards">            
+    <ul>
+        {% for pos in posts %}
+            <li class="card">
+                <div class="username">
+                    <h3>{{ pos['user']['username'] }}</h3>
+                    <div class="ellipsis">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </div>
+                </div>
+                <div class="mainimage">
+                    <img src="{{ pos['image_url'] }}" alt="Post image for {{ pos['user']['username'] }}">
+                </div>
+                <div class="interaction1">
+                    <div class="sharing">
+                        <!-- heart, speech bubble, dm, bookmark -->
+                        <div class="sharingleft">
+                            <div class="hearticon">
+                                <i class="far fa-heart"></i>
+                            </div>
+                            <div class="commenticon">
+                                <i class="far fa-comment"></i>
+                            </div>
+                            <div class="shareicon">
+                                <i class="far fa-paper-plane"></i>
+                            </div>                                                                
+                        </div>
+                        <div class="sharingright">
+                            <i class="far fa-bookmark"></i>
+                        </div>                            
+                    </div>
+                    <div class="likes">
+                        <p><strong>{{ pos['likes'] }} likes</strong></p>
+                    </div>
+                    <div class="caption">
+                            <p><strong>{{ pos['user']['username'] }}</strong>{{pos['title']}} <a href="#" class="bluelink">more<span style="display: none;"> of the caption</span></a></p>
+                    </div>
+                    <div class="comments">
+                        {% if pos['comments'] | length > 1 %} 
+                        <div class="postbutton">
+                            <a href="#" class="bluelink">View all {{pos['comments'] | length}} comments</a>
+                        </div>
+                        {% endif %}  
+                        {% if pos['comments'] | length > 0 %} 
+                        <div class="comment">
+                            <p><strong>{{pos['comments'][0]['user']['username']}}</strong> {{pos['comments'][0]['text']}}</p>
+                        </div>     
+                        {% endif %}                                          
+                    </div>
+                    <div class="postdate">
+                        {{pos['display_time']}}
+                    </div>
+                </div>
+                <hr>
+                <div class="interaction2">
+                    <div class="inputcomment">
+                        <div class="smileicon">
+                            <i class="far fa-smile"></i>
+                        </div>                            
+                        <input type="text" placeholder="Add a comment..." id="input_comment_{{loop.index}}">
+                        <label for="input_comment_{{loop.index}}" style="display: none;">Add a comment</label>
+                    </div>
+                    <div class="postbutton">
+                        <a href="#" class="bluelink">Post</a>
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+</section>
