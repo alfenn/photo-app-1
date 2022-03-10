@@ -3,6 +3,7 @@ from flask_restful import Resource
 from . import can_view_post
 import json
 from models import db, Comment, Post
+import flask_jwt_extended
 from my_decorators import secure_bookmark, \
     handle_db_insert_error, check_ownership_of_comment, is_valid_int, id_is_integer_or_400_error, secure_post
 
@@ -11,10 +12,13 @@ class CommentListEndpoint(Resource):
     def __init__(self, current_user):
         self.current_user = current_user
     
+    @flask_jwt_extended.jwt_required()
     @handle_db_insert_error
     def post(self):
         body = request.get_json()
         text = body.get('text')
+        if not text:
+            return Response(json.dumps({'message': 'Missing text.'}), mimetype="application/json", status=400)
         post_id = body.get('post_id')
         user_id = self.current_user.id # id of the user who is logged in
         
@@ -36,6 +40,8 @@ class CommentDetailEndpoint(Resource):
     def __init__(self, current_user):
         self.current_user = current_user
   
+
+    @flask_jwt_extended.jwt_required()
     @id_is_integer_or_400_error
     @check_ownership_of_comment
     def delete(self, id):
@@ -52,12 +58,12 @@ def initialize_routes(api):
         CommentListEndpoint, 
         '/api/comments', 
         '/api/comments/',
-        resource_class_kwargs={'current_user': api.app.current_user}
+        resource_class_kwargs={'current_user': flask_jwt_extended.current_user}
 
     )
     api.add_resource(
         CommentDetailEndpoint, 
         '/api/comments/<id>', 
         '/api/comments/<id>',
-        resource_class_kwargs={'current_user': api.app.current_user}
+        resource_class_kwargs={'current_user': flask_jwt_extended.current_user}
     )

@@ -3,6 +3,7 @@ from flask_restful import Resource
 from models import Bookmark, db
 import json
 from . import can_view_post
+import flask_jwt_extended
 from my_decorators import secure_bookmark, \
     handle_db_insert_error, check_ownership_of_bookmark, is_valid_int, id_is_integer_or_400_error
 
@@ -14,6 +15,7 @@ class BookmarksListEndpoint(Resource):
     def __init__(self, current_user):
         self.current_user = current_user
     
+    @flask_jwt_extended.jwt_required()
     def get(self):
         bookmarks = Bookmark.query.filter_by(
             user_id=self.current_user.id).order_by('id').all()
@@ -22,6 +24,8 @@ class BookmarksListEndpoint(Resource):
         ]
         return Response(json.dumps(bookmark_list_of_dictionaries), mimetype="application/json", status=200)
 
+
+    @flask_jwt_extended.jwt_required()
     @is_valid_int
     @secure_bookmark
     @handle_db_insert_error
@@ -41,6 +45,11 @@ class BookmarksListEndpoint(Resource):
         
         # to create a Bookmark, you need to pass it a user_id and a post_id
         
+        bookmark = db.session.query(Bookmark).filter(Bookmark.user_id==self.current_user.id, Bookmark.post_id==post_id).all()
+        if len(bookmark) > 0:
+            print(bookmark)
+            return Response(json.dumps({'message': 'Duplicate bookmark.'}), mimetype="application/json", status=400)
+
         bookmark = Bookmark(self.current_user.id, post_id)
         # these two lines save ("commit") the new record to the database:
         db.session.add(bookmark)
@@ -55,6 +64,8 @@ class BookmarkDetailEndpoint(Resource):
     def __init__(self, current_user):
         self.current_user = current_user
     
+
+    @flask_jwt_extended.jwt_required()
     @id_is_integer_or_400_error
     @check_ownership_of_bookmark
     def delete(self, id):
@@ -75,12 +86,12 @@ def initialize_routes(api):
         BookmarksListEndpoint, 
         '/api/bookmarks', 
         '/api/bookmarks/', 
-        resource_class_kwargs={'current_user': api.app.current_user}
+        resource_class_kwargs={'current_user': flask_jwt_extended.current_user}
     )
 
     api.add_resource(
         BookmarkDetailEndpoint, 
         '/api/bookmarks/<id>', 
         '/api/bookmarks/<id>',
-        resource_class_kwargs={'current_user': api.app.current_user}
+        resource_class_kwargs={'current_user': flask_jwt_extended.current_user}
     )

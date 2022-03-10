@@ -8,13 +8,13 @@ import os
 from models import db, User, ApiNavigator
 from views import bookmarks, comments, followers, following, \
     posts, profile, stories, suggestions, post_likes
-
 # new import statements:
 import flask_jwt_extended  
 import decorators
 
 # new views:
 from views import authentication, token
+
 
 app = Flask(__name__)
 
@@ -24,6 +24,12 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_URL')
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False    
 
+
+
+
+db.init_app(app)
+api = Api(app)
+
 #JWT config variables and manager (add after app object created):
 app.config["JWT_SECRET_KEY"] = os.environ.get('JWT_SECRET')
 app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies"]
@@ -31,8 +37,10 @@ app.config["JWT_COOKIE_SECURE"] = False
 jwt = flask_jwt_extended.JWTManager(app)
 
 
-db.init_app(app)
-api = Api(app)
+@jwt.user_lookup_loader
+def user_lookup_callback(_jwt_header, jwt_data):
+    user_id = jwt_data["sub"]
+    return User.query.filter_by(id=user_id).one_or_none()
 
 # set logged in user
 with app.app_context():
@@ -56,28 +64,12 @@ token.initialize_routes(api)
 
 # Server-side template for the homepage:
 @app.route('/')
+@decorators.jwt_or_login
 def home():
     return render_template(
         'starter-client.html', 
-        user=app.current_user
+        user=flask_jwt_extended.current_user
     )
-    
-@app.route('/lab6')
-def lab6():
-    return render_template(
-        'lab6.html',
-        user=app.current_user
-    )
-
-# @app.route('/api')
-# def api_docs():
-#     navigator = ApiNavigator(app.current_user)
-#     return render_template(
-#         'api/api-docs.html', 
-#         user=app.current_user,
-#         endpoints=navigator.get_endpoints(),
-#         url_root=request.url_root[0:-1] # trim trailing slash
-#     )
 
 # Updated API endpoint includes a reference to 
 # access_token and csrf token.
@@ -89,14 +81,13 @@ def api_docs():
     navigator = ApiNavigator(flask_jwt_extended.current_user)
     return render_template(
         'api/api-docs.html', 
-        user=app.current_user,  #TODO: change to flask_jwt_extended.current_user
+        user=flask_jwt_extended.current_user,  #TODO: change to flask_jwt_extended.current_user
         endpoints=navigator.get_endpoints(),
         access_token=access_token,
         csrf=csrf,
         url_root=request.url_root[0:-1] # trim trailing slash
     )
-    
-    
+
 
 # enables flask app to run using "python3 app.py"
 if __name__ == '__main__':
